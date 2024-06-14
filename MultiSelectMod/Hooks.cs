@@ -28,26 +28,22 @@ namespace MultiSelectMod
         public static int mainIgnored = 0;
         public static SelectableMainCharacterData mainCharData = new SelectableMainCharacterData();
         public static SelectableMainCharacterData nowakData = new SelectableMainCharacterData();
-
-        public static void PrepareCharacters(
-          Action<SelectableCharactersSO, HashSet<string>> orig,
-          SelectableCharactersSO self,
-          HashSet<string> unlockedCharacters)
+        public static void PrepareCharacters(Action<CharacterDataBase, HashSet<string>, AchievementsManagerData> orig, CharacterDataBase self, HashSet<string> unlockedCharacters, AchievementsManagerData achievements)
         {
             mainCharData._character = nowakData.Character;
             mainCharData._portrait = nowakData.Portrait;
             mainCharData._noPortrait = nowakData.NoPortrait;
             mainCharData._ignoredAbility = nowakData.IgnoredAbility;
             defaultNowak = true;
-            bool flag1 = true;
+            bool needswak = true;
             defaultSecondChar = true;
             SelectableCharacterData selectableCharacterData = new SelectableCharacterData("Nowak_CH", ResourceLoader.LoadSprite("NowakMenu"), ResourceLoader.LoadSprite("NowakMenu"));
-            foreach (SelectableCharacterData character in self._characters)
+            foreach (SelectableCharacterData character in self._selectableCharacters)
             {
                 if (character.CharacterName == "Nowak_CH")
-                    flag1 = false;
+                    needswak = false;
             }
-            if (flag1)
+            if (needswak)
             {
                 List<SelectableCharacterData> selectableCharacterDataList = new List<SelectableCharacterData>();
                 selectableCharacterDataList.Add(selectableCharacterData);
@@ -56,27 +52,26 @@ namespace MultiSelectMod
                     {
                         ignoredAbilities = new List<int>()
                     });
-                foreach (SelectableCharacterData character in self._characters)
+                foreach (SelectableCharacterData character in self._selectableCharacters)
                     selectableCharacterDataList.Add(character);
-                self._characters = selectableCharacterDataList.ToArray();
-                foreach (SelectableCharacterData character in self._characters)
+                self._selectableCharacters = selectableCharacterDataList;
+                foreach (SelectableCharacterData character in self._selectableCharacters)
                 {
                     if (!(character._characterName == "Nowak_CH"))
                         character.TryLoadIfAvailable(unlockedCharacters);
                     else
-                        character.LoadedCharacter = LoadedAssetsHandler.GetCharcater(character._characterName);
-                    if (character.HasCharacter && !(character._characterName == "Nowak_CH"))
+                        character.LoadedCharacter = LoadedAssetsHandler.GetCharacter(character._characterName);
+                    if (character.HasCharacter)
                     {
-                        bool flag2 = self._steamAchievements.IsAchievementOfflineUnlocked(character.TheWitnessAch);
-                        bool flag3 = self._steamAchievements.IsAchievementOfflineUnlocked(character.TheDivineAch);
-                        character.SetAchievementState(flag2, flag3);
+                        foreach (CharFinalBossAchData bossAchDatum in character.LoadedCharacter.m_BossAchData)
+                        {
+                            bossAchDatum.HasDefeatedBoss = (bossAchDatum.hasModdedAchievementUnlock && achievements.IsModdedAchievementOfflineUnlocked(bossAchDatum.moddedAchievementID)) || (bossAchDatum.HasAchievementUnlock && achievements.IsAchievementOfflineUnlocked(bossAchDatum.AchievementID));
+                        }
                     }
-                    else if (character.HasCharacter && character._characterName == "Nowak_CH")
-                        character.SetAchievementState(false, false);
                 }
             }
             else
-                orig(self, unlockedCharacters);
+                orig(self, unlockedCharacters, achievements);
         }
 
         public static void OnMainCharacterSelected(
@@ -93,7 +88,7 @@ namespace MultiSelectMod
             else
             {
                 RuntimeManager.PlayOneShot(self._characterClickEvent, new Vector3());
-                if (self.SelectedID < 0 || self.SelectedID >= self._selectableCharactersData.Length)
+                if (mainID < 0 || mainID >= self._selectableCharactersData.Count)
                 {
                     self._noCharacterInformation.SetActive(true);
                     self._extraCompanionInformation.SetActive(false);
@@ -107,6 +102,7 @@ namespace MultiSelectMod
                     self._selectionBiasInformation.SetActive(false);
                     self._trackerInfo.Activation(false);
                     self._charInfo.SetInformation(self._selectableCharactersData[mainID].LoadedCharacter);
+                    self._charInfo.RePickOption(mainIgnored);
                 }
             }
         }
@@ -125,7 +121,7 @@ namespace MultiSelectMod
             else
             {
                 RuntimeManager.PlayOneShot(self._characterClickEvent, new Vector3());
-                if (self.SelectedID < 0 || self.SelectedID >= self._selectableCharactersData.Length)
+                if (secondID < 0 || secondID >= self._selectableCharactersData.Count)
                 {
                     self._noCharacterInformation.SetActive(true);
                     self._extraCompanionInformation.SetActive(false);
@@ -139,6 +135,7 @@ namespace MultiSelectMod
                     self._selectionBiasInformation.SetActive(false);
                     self._trackerInfo.Activation(false);
                     self._charInfo.SetInformation(self._selectableCharactersData[secondID].LoadedCharacter);
+                    self._charInfo.RePickOption(secondIgnored);
                 }
             }
         }
@@ -151,6 +148,7 @@ namespace MultiSelectMod
             secondCharPick = false;
             mainCharPick = false;
             orig(self);
+            self._charInfo.RePickOption(firstIgnored);
         }
 
         public static void OnRandomCharacterSelected(
@@ -182,13 +180,13 @@ namespace MultiSelectMod
             self._trackerInfo.Activation(false);
             if (firstCharPick)
             {
-                self._selCompanionCharLayout.SetInformation(self._randomCharImage, self._randomCharImage, true, false, false, false);
+                self._selCompanionCharLayout.SetInformation(self._randomCharImage, self._randomCharImage, true);
                 self.SelectedID = -1;
                 firstIgnored = -1;
             }
             else if (secondCharPick)
             {
-                _secondPickCharLayout.SetInformation(self._randomCharImage, self._randomCharImage, true, false, false, false);
+                _secondPickCharLayout.SetInformation(self._randomCharImage, self._randomCharImage, true);
                 secondID = -1;
                 secondIgnored = -1;
             }
@@ -196,7 +194,7 @@ namespace MultiSelectMod
             {
                 if (!mainCharPick)
                     return;
-                self._selMainCharLayout.SetInformation(self._randomCharImage, self._randomCharImage, true, false, false, false);
+                self._selMainCharLayout.SetInformation(self._randomCharImage, self._randomCharImage, true);
                 mainID = -1;
                 mainIgnored = -1;
             }
@@ -207,7 +205,7 @@ namespace MultiSelectMod
           CharacterSelectionHandler self,
           int id)
         {
-            if (id < 0 || id >= self._selectableCharactersData.Length)
+            if (id < 0 || id >= self._selectableCharactersData.Count)
                 return;
             SelectableCharacterData selectableCharacterData = self._selectableCharactersData[id];
             if (selectableCharacterData.HasCharacter)
@@ -243,16 +241,16 @@ namespace MultiSelectMod
                 self._trackerInfo.Activation(false);
                 self._charInfo.SetInformation(selectableCharacterData.LoadedCharacter);
                 if (firstCharPick)
-                    self._selCompanionCharLayout.SetInformation(selectableCharacterData.Portrait, selectableCharacterData.NoPortrait, true, false, false, false);
+                    self._selCompanionCharLayout.SetInformation(selectableCharacterData.Portrait, selectableCharacterData.NoPortrait, true);
                 else if (secondCharPick)
                 {
-                    _secondPickCharLayout.SetInformation(selectableCharacterData.Portrait, selectableCharacterData.NoPortrait, true, false, false, false);
+                    _secondPickCharLayout.SetInformation(selectableCharacterData.Portrait, selectableCharacterData.NoPortrait, true);
                 }
                 else
                 {
                     if (!mainCharPick)
                         return;
-                    self._selMainCharLayout.SetInformation(selectableCharacterData.Portrait, selectableCharacterData.NoPortrait, true, false, false, false);
+                    self._selMainCharLayout.SetInformation(selectableCharacterData.Portrait, selectableCharacterData.NoPortrait, true);
                     mainCharData._portrait = selectableCharacterData.Portrait;
                     mainCharData._noPortrait = selectableCharacterData.NoPortrait;
                 }
@@ -273,7 +271,7 @@ namespace MultiSelectMod
                 self._noCharacterInformation.SetActive(false);
                 self._extraCompanionInformation.SetActive(false);
                 self._selectionBiasInformation.SetActive(false);
-                Debug.Log((object)"empty character?");
+                Debug.Log((object)"empty character? (Hi this is PYMN here,");
             }
         }
 
@@ -315,7 +313,7 @@ namespace MultiSelectMod
         {
             orig(self);
             mainCharData = new SelectableMainCharacterData();
-            nowakData = self._charSelectionDB.MainCharacter;
+            nowakData = self._charSelection._mainCharacter;
         }
 
         public static IEnumerator PrepareNewRunData(
@@ -326,9 +324,8 @@ namespace MultiSelectMod
             RunDataSO runDataSO = ScriptableObject.CreateInstance<RunDataSO>();
             List<InitialCharacter> initialCharacterList = new List<InitialCharacter>();
             bool selectionBiasActivity = self._charSelection.SelectionBiasActivity;
-            if (selectionBiasActivity != self._saveDataHandler.SelectionBiasActive)
-                SaveManager.UpdateSelectionBiasSaveData(selectionBiasActivity);
-            SelectableCharacterData[] characters = self._charSelectionDB.Characters;
+            LoadedDBsHandler.Options.UpdateSelectionBias(selectionBiasActivity);
+            SelectableCharacterData[] characters = self._charSelection._selectableCharactersData.ToArray();
             List<CharacterSO> possibleCharacters = new List<CharacterSO>();
             SelectableCharacterData[] selectableCharacterDataArray = characters;
             for (int index = 0; index < selectableCharacterDataArray.Length; ++index)
@@ -339,7 +336,7 @@ namespace MultiSelectMod
                 selectableCharacterData = null;
             }
             selectableCharacterDataArray = null;
-            SelectableMainCharacterData mainCharacter = self._charSelectionDB.MainCharacter;
+            SelectableMainCharacterData mainCharacter = self._charSelection._mainCharacter;
             CharacterSO maincharaSO = useCheater ? self._cheaterCharacter : mainCharacter.Character;
             if (mainID < 0 || mainID >= characters.Length || !characters[mainID].HasCharacter)
             {
@@ -393,7 +390,7 @@ namespace MultiSelectMod
             if (secondID < 0 || secondID >= characters.Length || !characters[secondID].HasCharacter)
             {
                 if (selectionBiasActivity)
-                    secondParty = self._charSelectionDB.GetCharacterByBias(firstParty, ignoredAbility1, possibleCharacters, out ignoredAbility2);
+                    secondParty = self._characterDB.GetCharacterByBias(firstParty, ignoredAbility1, possibleCharacters, out ignoredAbility2);
                 if (secondParty == null)
                 {
                     ignoredAbility2 = UnityEngine.Random.Range(0, 3);
@@ -425,11 +422,13 @@ namespace MultiSelectMod
             if (secondParty != null)
                 initialCharacterList.Add(new InitialCharacter(secondParty, 0, ignoredAbility2, false));
             runDataSO.InitializeRun(self._informationHolder.Game, initialCharacterList.ToArray(), self._informationHolder.GetZoneDBs());
-            runDataSO.zoneLoadingType = (ZoneLoadingType)0;
-            MainTutorialDataSO tutorialData = self._saveDataHandler.TutorialData;
-            OverworldTutorialHandler oWTutorialData = self._saveDataHandler.OWTutorialData;
-            self._informationHolder.PrepareGameRun(runDataSO, oWTutorialData, tutorialData);
-            yield return runDataSO.InitializeDataBase(self._informationHolder.Game, self._informationHolder.ItemPoolDB);
+            runDataSO.zoneLoadingType = ZoneLoadingType.ZoneStart;
+            //MainTutorialDataSO tutorialData = self._saveDataHandler.TutorialData;
+            //OverworldTutorialHandler oWTutorialData = self._saveDataHandler.OWTutorialData;
+            self._informationHolder.PrepareGameRun(runDataSO, true, true);
+            yield return runDataSO.InitializeDataBase(self._informationHolder.Game);
+            SaveDataManager_2024.FullySaveGameDataToCache(runDataSO);
+            SaveDataManager_2024.SaveCachedSaveFile();
             self.FinalizeMainMenuSounds();
             yield return self.LoadNextScene(self._owSceneToLoad);
         }
