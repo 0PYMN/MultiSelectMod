@@ -55,10 +55,22 @@ namespace MultiSelectMod
                 foreach (SelectableCharacterData character in self._selectableCharacters)
                     selectableCharacterDataList.Add(character);
                 self._selectableCharacters = selectableCharacterDataList;
-                foreach (SelectableCharacterData character in self._selectableCharacters)
+                /*foreach (SelectableCharacterData character in self._selectableCharacters)
                 {
                     if (!(character._characterName == "Nowak_CH"))
-                        character.TryLoadIfAvailable(unlockedCharacters);
+                    {
+                        CharacterSO andTrySetUpIfUnlocked = character.GetAndTrySetUpIfUnlocked(unlockedCharacters);
+                        if (andTrySetUpIfUnlocked == null || andTrySetUpIfUnlocked.Equals(null))
+                        {
+                            continue;
+                        }
+
+                        foreach (CharFinalBossAchData bossAchDatum in andTrySetUpIfUnlocked.m_BossAchData)
+                        {
+                            bossAchDatum.HasDefeatedBoss = (bossAchDatum.hasModdedAchievementUnlock && achievements.IsModdedAchievementOfflineUnlocked(bossAchDatum.moddedAchievementID)) || (bossAchDatum.HasAchievementUnlock && achievements.IsAchievementOfflineUnlocked(bossAchDatum.AchievementID));
+                        }
+                    }
+                        //character.TryLoadIfAvailable(unlockedCharacters);
                     else
                         character.LoadedCharacter = LoadedAssetsHandler.GetCharacter(character._characterName);
                     if (character.HasCharacter)
@@ -68,10 +80,10 @@ namespace MultiSelectMod
                             bossAchDatum.HasDefeatedBoss = (bossAchDatum.hasModdedAchievementUnlock && achievements.IsModdedAchievementOfflineUnlocked(bossAchDatum.moddedAchievementID)) || (bossAchDatum.HasAchievementUnlock && achievements.IsAchievementOfflineUnlocked(bossAchDatum.AchievementID));
                         }
                     }
-                }
+                }*/
             }
-            else
-                orig(self, unlockedCharacters, achievements);
+            //else
+            orig(self, unlockedCharacters, achievements);
         }
 
         public static void OnMainCharacterSelected(

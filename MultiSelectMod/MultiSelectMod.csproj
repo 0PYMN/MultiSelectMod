@@ -18,17 +18,11 @@
 	  <Reference Include="0Harmony">
 	    <HintPath>..\..\the folder for references VS\BO Modding Generic Dependencies\0Harmony.dll</HintPath>
 	  </Reference>
-	  <Reference Include="Album">
-	    <HintPath>..\..\the folder for references VS\BO Modding Generic Dependencies\Album.dll</HintPath>
-	  </Reference>
 	  <Reference Include="Assembly-CSharp">
 	    <HintPath>..\..\the folder for references VS\BO Modding Generic Dependencies\Assembly-CSharp.dll</HintPath>
 	  </Reference>
 	  <Reference Include="BepInEx">
 	    <HintPath>..\..\the folder for references VS\BO Modding Generic Dependencies\BepInEx.dll</HintPath>
-	  </Reference>
-	  <Reference Include="BrutalAPI">
-	    <HintPath>..\..\the folder for references VS\BO Modding Generic Dependencies\BrutalAPI.dll</HintPath>
 	  </Reference>
 	  <Reference Include="DOTween">
 	    <HintPath>..\..\the folder for references VS\BO Modding Generic Dependencies\DOTween.dll</HintPath>
@@ -86,15 +80,6 @@
 	  </Reference>
 	  <Reference Include="UnityEngine.UIModule">
 	    <HintPath>..\..\the folder for references VS\BO Modding Generic Dependencies\UnityEngine.UIModule.dll</HintPath>
-	  </Reference>
-	  <Reference Include="YarnSpinner">
-	    <HintPath>..\..\the folder for references VS\BO Modding Generic Dependencies\YarnSpinner.dll</HintPath>
-	  </Reference>
-	  <Reference Include="YarnSpinner.Compiler">
-	    <HintPath>..\..\the folder for references VS\BO Modding Generic Dependencies\YarnSpinner.Compiler.dll</HintPath>
-	  </Reference>
-	  <Reference Include="YarnSpinner.Unity">
-	    <HintPath>..\..\the folder for references VS\BO Modding Generic Dependencies\YarnSpinner.Unity.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
 
