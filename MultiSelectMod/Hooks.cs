@@ -333,6 +333,7 @@ namespace MultiSelectMod
           MainMenuController self,
           bool useCheater = false)
         {
+            //get all characters
             RunDataSO runDataSO = ScriptableObject.CreateInstance<RunDataSO>();
             List<InitialCharacter> initialCharacterList = new List<InitialCharacter>();
             bool selectionBiasActivity = self._charSelection.SelectionBiasActivity;
@@ -345,9 +346,11 @@ namespace MultiSelectMod
                 SelectableCharacterData selectableCharacterData = selectableCharacterDataArray[index];
                 if (selectableCharacterData.HasCharacter && !selectableCharacterData.IgnoreRandomSelection)
                     possibleCharacters.Add(selectableCharacterData.LoadedCharacter);
-                selectableCharacterData = null;
+                //selectableCharacterData = null; meaningless line?
             }
-            selectableCharacterDataArray = null;
+            //selectableCharacterDataArray = null; meaningless line?
+
+            //protagonist
             SelectableMainCharacterData mainCharacter = self._charSelection._mainCharacter;
             CharacterSO maincharaSO = useCheater ? self._cheaterCharacter : mainCharacter.Character;
             if (mainID < 0 || mainID >= characters.Length || !characters[mainID].HasCharacter)
@@ -381,6 +384,8 @@ namespace MultiSelectMod
                 selectedID = secondID;
                 secondID = -1;
             }
+
+            //first selectable
             CharacterSO firstParty;
             if (selectedID < 0 || selectedID >= characters.Length || !characters[selectedID].HasCharacter)
             {
@@ -433,7 +438,10 @@ namespace MultiSelectMod
             }
             if (secondParty != null)
                 initialCharacterList.Add(new InitialCharacter(secondParty, 0, ignoredAbility2, false));
-            runDataSO.InitializeRun(self._informationHolder.Game, initialCharacterList.ToArray(), self._informationHolder.GetZoneDBs());
+
+            string id = (self._informationHolder.HardMode ? RunType_GameIDs.Hard.ToString() : RunType_GameIDs.Tutorial.ToString());
+            RunInformationData runInformation = LoadedDBsHandler.MiscDB.GetRunInformation(id);
+            runDataSO.InitializeRun(self._informationHolder.Game, initialCharacterList.ToArray(), runInformation.GenerateRunZones());
             runDataSO.zoneLoadingType = ZoneLoadingType.ZoneStart;
             //MainTutorialDataSO tutorialData = self._saveDataHandler.TutorialData;
             //OverworldTutorialHandler oWTutorialData = self._saveDataHandler.OWTutorialData;
