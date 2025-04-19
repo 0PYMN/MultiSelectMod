@@ -35,6 +35,8 @@ namespace MultiSelectMod
             mainCharData._noPortrait = nowakData.NoPortrait;
             mainCharData._ignoredAbility = nowakData.IgnoredAbility;
             defaultNowak = true;
+            secondID = -1;
+            mainID = -1;
             bool needswak = true;
             defaultSecondChar = true;
             SelectableCharacterData selectableCharacterData = new SelectableCharacterData("Nowak_CH", ResourceLoader.LoadSprite("NowakMenu"), ResourceLoader.LoadSprite("NowakMenu"));
